@@ -28,8 +28,9 @@ class VsMongooseSession implements IMongoDbSessionStore {
   private options: VsSessionOptions;
   private sessionModel;
   private defaultResetInSeconds: number = 30 * 24 * 60 * 60;
+  private static instance: VsMongooseSession;
 
-  constructor(options: VsSessionOptions) {
+  private constructor(options: VsSessionOptions) {
     const {
       collectionName = `session_${getDbName(options.url)}`,
       expiresInSeconds = this.defaultResetInSeconds,
@@ -46,6 +47,13 @@ class VsMongooseSession implements IMongoDbSessionStore {
       collectionName
     );
     this.connect();
+  }
+
+  public static getInstance(options: VsSessionOptions): VsMongooseSession {
+    if (!VsMongooseSession.instance) {
+      VsMongooseSession.instance = new VsMongooseSession(options);
+    }
+    return VsMongooseSession.instance;
   }
 
   /**
@@ -101,7 +109,7 @@ class VsMongooseSession implements IMongoDbSessionStore {
   public async createSession(
     session: VsSessionDocument
   ): Promise<VsSessionDocument> {
-    const sessionId = DEFAULTS.sessionId;
+    const sessionId = DEFAULTS.sessionId();
     const { key = sessionId, expiry, sessionContext = {} } = session;
     const _session = await this.sessionModel.findOneAndUpdate(
       {

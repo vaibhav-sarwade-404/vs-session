@@ -3,7 +3,9 @@ declare class VsMongooseSession implements IMongoDbSessionStore {
     private options;
     private sessionModel;
     private defaultResetInSeconds;
-    constructor(options: VsSessionOptions);
+    private static instance;
+    private constructor();
+    static getInstance(options: VsSessionOptions): VsMongooseSession;
     /**
      * connect
      */

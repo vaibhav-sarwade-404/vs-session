@@ -6,7 +6,9 @@ declare class VsMongoSession implements IMongoDbSessionStore {
     private sessionCollection;
     private expiryIndexName;
     private defaultResetInSeconds;
-    constructor(options: VsSessionOptions);
+    private static instance;
+    private constructor();
+    static getInstance(options: VsSessionOptions): VsMongoSession;
     /**
      * connect
      */

@@ -6,19 +6,16 @@ const GENERAL = {
   sessionExpiry: 30 * 24 * 60 * 60,
   setCookieHeader: "Set-Cookie",
   randomCharSet: `${randomConstants.LOWERCASE_ALPHABETE}${randomConstants.UPPERCASE_ALPHABET}${randomConstants.NUMBERS}/_.`,
-  sessionDocument: (() => {
-    return { key: "", expiry: new Date(), sessionContext: {} };
-  })()
+  sessionDocument: () => ({ key: "", expiry: new Date(), sessionContext: {} })
 };
 
 const DEFAULTS = {
   ...GENERAL,
-  sessionId: (() => {
-    return random({
+  sessionId: () =>
+    random({
       length: 32,
       charset: GENERAL.randomCharSet
-    });
-  })()
+    })
 };
 
 export { DEFAULTS };

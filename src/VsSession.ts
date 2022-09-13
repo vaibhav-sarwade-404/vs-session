@@ -11,13 +11,6 @@ import {
 } from "./types/VsSession.types";
 import { DEFAULTS } from "./utils/constants";
 import { getRemoveCookieHeaderValue } from "./utils/helper";
-// import VsMongoSession from "./VsMongoSession";
-// import VsMongooseSession from "./VsMongooseSession";
-
-// const MongoDbHandlerPackages = {
-//   mongodb: VsMongoSession,
-//   mongoose: VsMongooseSession
-// };
 
 async function getMongoDbHandlerPackage(
   packageName: MongoDbHandlerPackage,
@@ -25,10 +18,10 @@ async function getMongoDbHandlerPackage(
 ): Promise<IMongoDbSessionStore> {
   if (packageName === "mongodb") {
     const VsMongoSession = (await import("./VsMongoSession")).default;
-    return new VsMongoSession(options);
+    return VsMongoSession.getInstance(options);
   }
   const VsMongooseSession = (await import("./VsMongooseSession")).default;
-  return new VsMongooseSession(options);
+  return VsMongooseSession.getInstance(options);
 }
 
 const VsSession = (options: VsSessionOptions) => {
@@ -39,12 +32,14 @@ const VsSession = (options: VsSessionOptions) => {
     throw new TypeError(`secret is missing`);
   }
   const cookieName = options.cookie.name || DEFAULTS.cookieName;
-
+  let vsMongoSessionStore: IMongoDbSessionStore;
   return async (req: Request, resp: Response, next: NextFunction) => {
-    const vsMongoSessionStore = await getMongoDbHandlerPackage(
-      options.mongoDbOperationHandlerPackage || "mongodb",
-      options
-    );
+    if (!vsMongoSessionStore) {
+      vsMongoSessionStore = await getMongoDbHandlerPackage(
+        options.mongoDbOperationHandlerPackage || "mongodb",
+        options
+      );
+    }
 
     const encrichRequest = async (
       req: Request,
@@ -188,25 +183,20 @@ const VsSession = (options: VsSessionOptions) => {
       Array.isArray(options.onlyCheckSessionRoutes) &&
       options.onlyCheckSessionRoutes.includes(req.route.path);
     if (cookies || (cookies && onlyCheckSession)) {
-      const signedSessionCookie = getCookie(cookies, cookieName) || "";
-      if (signedSessionCookie) {
-        const sessionCookie =
-          getCookie(cookies, cookieName, {
-            secret: options.secret
-          }) || "";
-        if (sessionCookie && verify(signedSessionCookie, options.secret)) {
-          const session = await vsMongoSessionStore.getSession(sessionCookie);
-          if (session) {
-            await encrichRequest(req, resp, {
-              sessionId: session.key || "",
-              sessionContext: session.sessionContext || {}
-            });
-          } else {
-            resp.header(
-              DEFAULTS.setCookieHeader,
-              getRemoveCookieHeaderValue(cookieName)
-            );
-          }
+      const sessionCookie =
+        getCookie(cookies, cookieName, { secret: options.secret }) || "";
+      if (sessionCookie) {
+        const session = await vsMongoSessionStore.getSession(sessionCookie);
+        if (session) {
+          await encrichRequest(req, resp, {
+            sessionId: session.key || "",
+            sessionContext: session.sessionContext || {}
+          });
+        } else {
+          resp.header(
+            DEFAULTS.setCookieHeader,
+            getRemoveCookieHeaderValue(cookieName)
+          );
         }
       }
     } else if (!onlyCheckSession) {
@@ -218,8 +208,12 @@ const VsSession = (options: VsSessionOptions) => {
         secure = false,
         sameSite
       } = options.cookie || {};
+      let sessionId = DEFAULTS.sessionId();
+      if (typeof options.sessionIdGenerator === "function") {
+        sessionId = options.sessionIdGenerator();
+      }
       const session = await createSession({
-        key: DEFAULTS.sessionId,
+        key: sessionId,
         expiry: new Date(Date.now() + maxAge * 1000),
         sessionContext: {}
       });

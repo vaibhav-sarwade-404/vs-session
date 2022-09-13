@@ -1,10 +1,10 @@
 declare const DEFAULTS: {
-    sessionId: string;
+    sessionId: () => string;
     cookieName: string;
     sessionExpiry: number;
     setCookieHeader: string;
     randomCharSet: string;
-    sessionDocument: {
+    sessionDocument: () => {
         key: string;
         expiry: Date;
         sessionContext: {};

@@ -19,8 +19,9 @@ class VsMongoSession implements IMongoDbSessionStore {
   private sessionCollection!: Collection;
   private expiryIndexName: string = `expiry`;
   private defaultResetInSeconds: number = 30 * 24 * 60 * 60;
+  private static instance: VsMongoSession;
 
-  constructor(options: VsSessionOptions) {
+  private constructor(options: VsSessionOptions) {
     const {
       collectionName = `session_${getDbName(options.url)}`,
       expiresInSeconds = this.defaultResetInSeconds,
@@ -31,6 +32,13 @@ class VsMongoSession implements IMongoDbSessionStore {
       expiresInSeconds,
       ...restOptions
     };
+  }
+
+  public static getInstance(options: VsSessionOptions): VsMongoSession {
+    if (!VsMongoSession.instance) {
+      VsMongoSession.instance = new VsMongoSession(options);
+    }
+    return VsMongoSession.instance;
   }
 
   /**
@@ -135,7 +143,7 @@ class VsMongoSession implements IMongoDbSessionStore {
     sessionId: string
   ): Promise<VsSessionDocument | undefined | never> {
     const sessionCollection = await this.getCollection();
-    const defaultSession = DEFAULTS.sessionDocument;
+    const defaultSession = DEFAULTS.sessionDocument();
     if (sessionCollection) {
       const _session = await this.sessionCollection.findOne({ key: sessionId });
       if (_session) {
@@ -156,9 +164,9 @@ class VsMongoSession implements IMongoDbSessionStore {
     session: VsSessionDocument
   ): Promise<VsSessionDocument | undefined | never> {
     const sessionCollection = await this.getCollection();
-    const defaultSession = DEFAULTS.sessionDocument;
+    const defaultSession = DEFAULTS.sessionDocument();
     if (sessionCollection) {
-      const sessionId = DEFAULTS.sessionId;
+      const sessionId = DEFAULTS.sessionId();
       const { key = sessionId, expiry, sessionContext = {} } = session;
       const _session = await sessionCollection.findOneAndUpdate(
         {
@@ -191,7 +199,7 @@ class VsMongoSession implements IMongoDbSessionStore {
     session: VsSessionDocument
   ): Promise<VsSessionDocument | undefined | never> {
     const sessionCollection = await this.getCollection();
-    const defaultSession = DEFAULTS.sessionDocument;
+    const defaultSession = DEFAULTS.sessionDocument();
     if (sessionCollection) {
       const { key = session.key, expiry, sessionContext = {} } = session;
       const _session = await sessionCollection.findOneAndUpdate(

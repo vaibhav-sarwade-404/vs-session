@@ -1,6 +1,6 @@
 {
   "name": "@vs-org/session",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "This is simple express session management middleware with Mongo DB for storing sessios. This package supports validate, destroy, create sessions.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,7 +9,8 @@
   ],
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only index.ts",
-    "build": "rm -rf lib/ && tsc"
+    "build": "rm -rf lib/ && tsc",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -17,14 +18,23 @@
   },
   "author": "Vaibhav Sarwade",
   "license": "MIT",
-  "keywords": ["Express session manager","express session","Mongo Db session","session handler","VS session","vs session","@vs-org/session","vs-org session"],
+  "keywords": [
+    "Express session manager",
+    "express session",
+    "Mongo Db session",
+    "session handler",
+    "VS session",
+    "vs session",
+    "@vs-org/session",
+    "vs-org session"
+  ],
   "bugs": {
     "url": "https://github.com/vaibhav-sarwade-404/vs-session/issues"
   },
   "homepage": "https://github.com/vaibhav-sarwade-404/vs-session#readme",
   "devDependencies": {
     "@types/node": "^18.7.15",
-    "@vs-org/cookie": "0.0.7",
+    "@vs-org/cookie": "0.0.9",
     "@vs-org/random": "0.0.6",
     "express": "^4.18.1",
     "mongodb": "^4.9.1",
@@ -34,7 +44,7 @@
     "typescript": "^4.8.2"
   },
   "peerDependencies": {
-    "@vs-org/cookie": ">=0.0.7",
+    "@vs-org/cookie": ">=0.0.9",
     "@vs-org/random": ">=0.0.6",
     "express": ">=4.18.1",
     "mongodb": ">=4.9.1",
