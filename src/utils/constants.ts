@@ -13,7 +13,7 @@ const DEFAULTS = {
   ...GENERAL,
   sessionId: () =>
     random({
-      length: 32,
+      length: 72,
       charset: GENERAL.randomCharSet
     })
 };

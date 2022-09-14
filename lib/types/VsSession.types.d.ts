@@ -44,7 +44,28 @@ export declare type VsSessionOptions = {
      * Add routes to check session only.
      * If this flag is set with middleware package will just populate session if session cookie is present and has valid session.
      */
-    onlyCheckSessionRoutes?: string[];
+    onlyCheckSessionRoutes?: Array<string>;
+    /**
+     * Add routes to check session only.
+     * If this flag is set with middleware package will just populate session if session cookie is present and has valid session.
+     *
+     * Object key should be route and HTTP method for that route
+     *
+     * Eg:
+     *
+     * {
+     *  "POST": ["/update-profile"],
+     *  "GET": ["/logout"]
+     * }
+     *
+     */
+    onlyCheckSessionRoutesWithHTTPMethod?: HttpMethodsRoutesArray;
+};
+export declare type HttpMethodsRoutesArray = {
+    GET?: Array<string>;
+    POST?: Array<string>;
+    PATHC?: Array<string>;
+    DELETE?: Array<string>;
 };
 /**
  * Generic object key and value
@@ -59,7 +80,7 @@ export declare type VsSessionCookie = {
     name: string;
     path: string;
     domain: string;
-    maxAge: number;
+    maxAge?: number;
     httpOnly: boolean;
     secure: boolean;
     /**
@@ -74,6 +95,11 @@ export declare type VsSessionCookie = {
      * SameSite as "Strict" or "Lax"
      */
     sameSite: true | "Strict" | "Lax" | "None";
+    /**
+     * Use this header if cookies are coming from custom header.
+     * For example if proxy is used and cookies are filtered and application is using differnt header for cookie use this option. So that VsSession can extract cookie from exact header.
+     */
+    header?: string;
 };
 /**
  * Generic object

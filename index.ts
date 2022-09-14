@@ -6,19 +6,23 @@ import VsSession from "./src";
   const app = express();
 
   const vsSession = VsSession({
-    url: "mongodb://localhost:27017/vs-rate-limiter",
+    url: "mongodb://localhost:27017/vs-session",
     collectionName: "login-session",
     secret: "This is session secret",
+
     cookie: {
       domain: "",
-      maxAge: 120,
       httpOnly: false,
       name: "vs-session",
       path: "/",
       secure: true,
-      sameSite: "None"
+      sameSite: "None",
+      maxAge: 3 * 24 * 60 * 60
     },
-    onlyCheckSessionRoutes: ["/update-session", "/logout"],
+    onlyCheckSessionRoutes: ["/logout"],
+    onlyCheckSessionRoutesWithHTTPMethod: {
+      GET: ["/update-session"]
+    },
     mongoDbOperationHandlerPackage: "mongoose"
   });
   app.get("/login", vsSession, async (req: Request, resp: Response) => {

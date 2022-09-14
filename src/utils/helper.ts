@@ -14,4 +14,18 @@ const getRemoveCookieHeaderValue = (cookieName: string) =>
     "Max-Age": 0
   });
 
-export { getDate, getRemoveCookieHeaderValue };
+/**
+ * This helper function will return first key with value
+ * @param obj - Object
+ * @param value - value to find
+ * @returns {string | undefined}
+ */
+const getObjectKeyFromValue = (obj: { [key: string]: any }, value: any) => {
+  const objKeysArr = Object.keys(obj);
+  if (!objKeysArr.length) {
+    return;
+  }
+  return objKeysArr.find(objKey => obj[objKey] === value);
+};
+
+export { getDate, getRemoveCookieHeaderValue, getObjectKeyFromValue };
